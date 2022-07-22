@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        {{- range $k, $v := .Values.labels }}
+        {{ $k }}: {{ $v |quote }}
+        {{- end }}
+      annotations:
+        {{- range $k, $v := .Values.annotations }}
+        {{ $k }}: {{ $v |quote }}
+        {{- end }}
+    spec:
+      {{- if .Values.customSpec }}
+      {{- .Values.customSpec |toYaml |nindent 6 }}
+      {{- end }}
+      {{- if or .Values.volumes .Values.litestream.enabled }}
+      volumes: 
+      {{- if .Values.litestream.enabled }}
+      - name: litestream-data
+        emptyDir: {}
+      - name: {{ .Release.Name }}-litestream
+        configMap:
+          name: {{ .Release.Name }}-litestream
+      {{- end }}
+        {{- include "generic.volume" . | trim|nindent 6 }}
+      {{- end }}
+      {{- if .Values.security.enabled }}
+      securityContext:
+        runAsUser: {{ .Values.security.user }}
+      {{- end }}
+      containers:
+        {{- include "generic.pod" . | nindent 6 }}
+      {{- if .Values.litestream.enabled }}
+        {{- include "generic.litestream" . | nindent 6 }}
+      initContainers:
+      {{- include "generic.init.litestream" . |nindent 6 -}}
+      {{- end }}

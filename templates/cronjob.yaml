@@ -1,0 +1,35 @@
+{{- if .Values.litestream.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-{{ .Release.Name }}
+spec:
+  schedule: "45 23 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          nodeSelector:
+            node: media
+          containers:
+          - name: litestream 
+            image: litestream/litestream
+            args:
+              - restore
+              - {{ .Values.litestream.path }}/{{ .Values.litestream.db | default .Release.Name }}.db
+            volumeMounts:
+            - name: sqlites 
+              mountPath: {{ .Values.litestream.path }}
+            - name: {{ .Release.Name }}
+              mountPath: /etc/litestream.yml
+              subPath: litestream.yml
+          restartPolicy: Never
+          volumes:
+          - name: sqlites 
+            hostPath:
+              path: /opt/sqlites
+          - name: {{ .Release.Name }}
+            configMap:
+              name: {{ .Release.Name }}-litestream 
+{{- end }}

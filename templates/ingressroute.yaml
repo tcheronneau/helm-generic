@@ -1,0 +1,37 @@
+{{- range $serviceName, $data := .Values.ingressRoutes }} 
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ $serviceName }} 
+spec:
+  entryPoints: 
+{{- if $data.entrypoints }}
+    {{ $data.entrypoints }}
+{{- else }}
+    - web 
+    - websecure
+{{- end }}
+  routes:
+{{- range $k,$value := $data }}
+  - kind: Rule
+    {{- if $value.match }}
+    match: {{ $value.match }}
+    {{- else }}
+    match: Host(`{{ $value.host }}`)
+    {{- end }}
+    middlewares:
+    - name: {{ $value.middleware | default "secured" }}
+      namespace: {{ $value.middlewareNamespace | default "kube-system" }}
+    services:
+    - name: {{ $value.destination | default $serviceName }}
+      {{- if $value.port }}
+      port: {{ $value.port }}
+      {{- end }}
+{{- end }}
+  tls:
+    certResolver: default 
+    domains:
+      - main: "mcth.fr"
+        sans:
+          - "*.mcth.fr"
+{{- end }}

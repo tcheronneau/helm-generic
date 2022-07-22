@@ -1,0 +1,27 @@
+image:
+  repository: registry.mcth.fr/docker
+  name: generic 
+  tag: latest
+  pullPolicy: IfNotPresent 
+
+litestream:
+  enabled: true 
+  path: /config
+  version: 0.3.6
+
+security:
+  enabled: true
+  user: 1005
+command: []
+args: [] 
+labels: {}
+annotations: {}
+env: {}
+
+volumes: {}
+services: {}
+
+ingressRoutes: {}
+
+volumes: {}
+resources: {}

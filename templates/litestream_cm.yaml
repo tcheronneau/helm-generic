@@ -1,0 +1,19 @@
+{{- if .Values.litestream.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-litestream
+data:
+  litestream.yml: |-
+    access-key-id: litestream
+    secret-access-key: litestream
+    
+    dbs:
+      - path: {{ .Values.litestream.path }}/{{ .Values.litestream.db | default .Release.Name }}.db
+        replicas:
+          - type: s3
+            bucket: litestream
+            path: {{ .Values.litestream.db | default .Release.Name }}.db
+            endpoint: https://minio-api.domain.tld
+            forcePathStyle: true
+{{- end }}
