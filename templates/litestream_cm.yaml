@@ -14,6 +14,6 @@ data:
           - type: s3
             bucket: litestream
             path: {{ .Values.litestream.db | default .Release.Name }}.db
-            endpoint: https://minio-api.domain.tld
+            endpoint: {{ .Values.litestream.minio_url }} 
             forcePathStyle: true
 {{- end }}

@@ -8,6 +8,7 @@ litestream:
   enabled: true 
   path: /config
   version: 0.3.6
+  minio_url: https://minio-api.domain.tld
 
 security:
   enabled: true
